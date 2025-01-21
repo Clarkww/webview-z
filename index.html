@@ -31,22 +31,15 @@
     <!-- <p>hi</p> -->
 
     <script>
-
-        // we need to see the console logs in react natvie webview
-        
         console.log('hello from webview')
 
-        // console.log = function(message) {
-        //     window.ReactNativeWebView.postMessage(message);
-        // };
         const scene = new THREE.Scene()
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
-        const renderer = new THREE.WebGLRenderer({alpha: true})
+        const renderer = new THREE.WebGLRenderer({ alpha: true })
         renderer.setSize(window.innerWidth, window.innerHeight)
         renderer.setClearColor(0x000000, 0)
         document.body.appendChild(renderer.domElement)
 
-        // console.log(`window.innerWidth: ${window.innerWidth}`)
         console.log(`window.innerHeight: ${window.innerHeight}`)
 
         const ambientLight = new THREE.AmbientLight(0x404040)
@@ -57,19 +50,22 @@
         scene.add(directionalLight)
 
         const loader = new THREE.OBJLoader()
+        let teethObject;
         loader.load('./assets/teeth.obj', function(object) {
             object.position.set(0, -0.3, 3)
             scene.add(object)
-
+            teethObject = object; // Store the object for rotation
         }, undefined, function(error) {
             console.error(error)
-
         })
 
         camera.position.z = 5
 
         function animate() {
             requestAnimationFrame(animate)
+            if (teethObject) {
+                teethObject.rotation.y += 0.001; // Rotate the object around the y-axis
+            }
             renderer.render(scene, camera)
         }
 
