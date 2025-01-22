@@ -7,6 +7,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/MTLLoader.js"></script>
     <style>
         * {
             margin: 0;
@@ -34,7 +35,7 @@
         console.log('hello from webview')
 
         const scene = new THREE.Scene()
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100)
         const renderer = new THREE.WebGLRenderer({ alpha: true })
         renderer.setSize(window.innerWidth, window.innerHeight)
         renderer.setClearColor(0x000000, 0)
@@ -45,28 +46,54 @@
         const ambientLight = new THREE.AmbientLight(0x404040)
         scene.add(ambientLight)
 
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 1)
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.9)
         directionalLight.position.set(5, 5, 5).normalize()
         scene.add(directionalLight)
 
-        const loader = new THREE.OBJLoader()
+        // const loader = new THREE.OBJLoader()
+        // let teethObject;
+        // loader.load('./assets/teeth-open.obj', function(object) {
+        //     object.position.set(0, -0.3, 3)
+        //     scene.add(object)
+        //     teethObject = object; // Store the object for rotation
+        // }, undefined, function(error) {
+        //     console.error(error)
+        // })
+
+        // load mtl and obj
+
+        const mtlLoader = new THREE.MTLLoader()
         let teethObject;
-        loader.load('./assets/teeth.obj', function(object) {
-            object.position.set(0, -0.3, 3)
-            scene.add(object)
-            teethObject = object; // Store the object for rotation
-        }, undefined, function(error) {
-            console.error(error)
+        mtlLoader.load('./assets/teeth2.mtl', function(materials) {
+            materials.preload()
+            const objLoader = new THREE.OBJLoader()
+            objLoader.setMaterials(materials)
+            objLoader.load('./assets/teeth2.obj', function(object) {
+                object.position.set(0, -0.9, 2)
+                scene.add(object)
+                teethObject = object; // Store the object for rotation
+            }, undefined, function(error) {
+                console.error(error)
+            })
         })
+
+
+
 
         camera.position.z = 5
 
+        let clock = new THREE.Clock();
+        let speed = 0.9; // Adjust this value to control the speed
+
         function animate() {
-            requestAnimationFrame(animate)
+            requestAnimationFrame(animate);
+
             if (teethObject) {
-                teethObject.rotation.y += 0.001; // Rotate the object around the y-axis
+                let time = clock.getElapsedTime() * speed;
+                teethObject.rotation.y = Math.sin(time) * (70 * Math.PI / 400); // Oscillate between -70 and 70 degrees
             }
-            renderer.render(scene, camera)
+
+            renderer.render(scene, camera);
         }
 
         animate()
